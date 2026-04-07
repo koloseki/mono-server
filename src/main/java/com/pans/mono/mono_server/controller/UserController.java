@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -47,15 +48,19 @@ public class UserController {
     public ResponseEntity<String> login(@RequestBody AuthRequest request) {
         var userOptional = userRepository.findByUsername(request.username);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.badRequest().body("Invalid username or password");
         }
 
         User user = userOptional.get();
 
         if (!BCrypt.checkpw(request.password, user.getPassword())) {
-            return ResponseEntity.badRequest().body("Invalid password");
+            return ResponseEntity.badRequest().body("Invalid username or password");
         }else {
-            return ResponseEntity.ok("You are logged in as: " + user.getUsername() + " :)");
+            String sessionToken = UUID.randomUUID().toString();
+            user.setSessionToken(sessionToken);
+            userRepository.save(user);
+
+            return ResponseEntity.ok(sessionToken);
         }
     }
 }
