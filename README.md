@@ -24,13 +24,6 @@ This project serves as a practical application of software design patterns, lear
 * **Maven:** Project build and dependency management.
 * **Lombok:** Boilerplate code reduction.
 
-**Frontend (Client):**
-* **Java 25:** Core language for the client application.
-* **Console Interface (CLI):** Primary user interface for the MVP (Minimum Viable Product) phase.
-* **JavaFX:** Planned graphical user interface (GUI) for the final version.
-* **Java HttpClient:** Built-in Java library for handling REST file transfers.
-* **Java WebSocket Client:** For maintaining real-time connections with the server.
-
 **Deployment & Hosting:**
 * **Localhost:** Initial development, testing, and debugging environment.
 * **Google Cloud Platform (GCP):** Target production cloud environment.
