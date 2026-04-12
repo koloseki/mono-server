@@ -5,10 +5,17 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
 public class ChatController {
+
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public ChatController(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
@@ -23,4 +30,12 @@ public class ChatController {
         return message;
     }
 
+    @MessageMapping("/chat.privateMessage")
+    public void sendPrivateMessage(@Payload ChatMessage message) {
+        messagingTemplate.convertAndSendToUser(
+                message.getReceiver(),
+                "/queue/messages/",
+                message
+        );
+    };
 }
