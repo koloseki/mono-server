@@ -1,6 +1,6 @@
 package com.pans.mono.mono_server.controller;
 
-import com.pans.mono.mono_server.model.ChatMessage;
+import com.pans.mono.mono_server.dto.ChatMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

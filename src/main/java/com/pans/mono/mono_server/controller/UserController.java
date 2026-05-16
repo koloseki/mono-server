@@ -1,5 +1,6 @@
 package com.pans.mono.mono_server.controller;
 
+import com.pans.mono.mono_server.dto.AuthResponse;
 import com.pans.mono.mono_server.model.User;
 import com.pans.mono.mono_server.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
@@ -45,7 +46,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         var userOptional = userRepository.findByUsername(request.username);
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("Invalid username or password");
@@ -60,7 +61,7 @@ public class UserController {
             user.setSessionToken(sessionToken);
             userRepository.save(user);
 
-            return ResponseEntity.ok(sessionToken);
+            return ResponseEntity.ok(new AuthResponse(sessionToken));
         }
     }
 }

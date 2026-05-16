@@ -1,9 +1,9 @@
 package com.pans.mono.mono_server.controller;
 
-import com.pans.mono.mono_server.model.ChatMessage;
+import com.pans.mono.mono_server.dto.ChatMessage;
+import com.pans.mono.mono_server.service.RoomTracker;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
@@ -12,22 +12,32 @@ import org.springframework.stereotype.Controller;
 public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final RoomTracker roomTracker;
 
-    public ChatController(SimpMessagingTemplate messagingTemplate) {
+    public ChatController(SimpMessagingTemplate messagingTemplate, RoomTracker roomTracker) {
         this.messagingTemplate = messagingTemplate;
+        this.roomTracker = roomTracker;
     }
 
     @MessageMapping("/chat.sendMessage")
-    @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage message) {
-        return message;
+    public void sendMessage(@Payload ChatMessage message) {
+        String destination = message.getRoomId() != null
+                ? "/topic/room." + message.getRoomId()
+                : "/topic/public";
+        messagingTemplate.convertAndSend(destination, message);
     }
 
     @MessageMapping("/chat.addUser")
-    @SendTo("/topic/public")
-    public ChatMessage addUser(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
+    public void addUser(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
         headerAccessor.getSessionAttributes().put("username", message.getSender());
-        return message;
+        if (message.getRoomId() != null) {
+            headerAccessor.getSessionAttributes().put("roomId", message.getRoomId());
+            roomTracker.userJoined(message.getRoomId(), message.getSender());
+        }
+        String destination = message.getRoomId() != null
+                ? "/topic/room." + message.getRoomId()
+                : "/topic/public";
+        messagingTemplate.convertAndSend(destination, message);
     }
 
     @MessageMapping("/chat.privateMessage")
@@ -37,5 +47,5 @@ public class ChatController {
                 "/queue/messages/",
                 message
         );
-    };
+    }
 }
