@@ -20,7 +20,11 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload ChatMessage message) {
+    public void sendMessage(@Payload ChatMessage message, SimpMessageHeaderAccessor headerAccessor) {
+        if (message.getType() == ChatMessage.MessageType.JOIN && message.getRoomId() != null) {
+            headerAccessor.getSessionAttributes().put("username", message.getSender());
+            headerAccessor.getSessionAttributes().put("roomId", message.getRoomId());
+        }
         String destination = message.getRoomId() != null
                 ? "/topic/room." + message.getRoomId()
                 : "/topic/public";
