@@ -18,7 +18,7 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (roomRepository.count() == 0) {
-            List<String> defaultRooms = List.of("Ogólny", "Programowanie", "Off-topic");
+            List<String> defaultRooms = List.of("General", "Rezydencja", "Programowanie");
             for (String name : defaultRooms) {
                 Room room = new Room();
                 room.setId(UUID.randomUUID().toString());

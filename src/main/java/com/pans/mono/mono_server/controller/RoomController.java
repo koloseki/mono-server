@@ -1,8 +1,10 @@
 package com.pans.mono.mono_server.controller;
 
 import com.pans.mono.mono_server.dto.RoomDto;
+import com.pans.mono.mono_server.model.Message;
 import com.pans.mono.mono_server.model.Room;
 import com.pans.mono.mono_server.model.User;
+import com.pans.mono.mono_server.repository.MessageRepository;
 import com.pans.mono.mono_server.repository.RoomRepository;
 import com.pans.mono.mono_server.repository.UserRepository;
 import com.pans.mono.mono_server.service.RoomTracker;
@@ -22,6 +24,7 @@ public class RoomController {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final RoomTracker roomTracker;
+    private final MessageRepository messageRepository;
 
     @GetMapping
     public ResponseEntity<?> getRooms(@RequestHeader("Authorization") String authHeader) {
@@ -84,6 +87,21 @@ public class RoomController {
         }
         String token = authHeader.substring(7);
         return userRepository.findBySessionToken(token).orElse(null);
+    }
+
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<?> getMessages(@PathVariable String id,
+                                         @RequestHeader("Authorization") String authHeader) {
+        if (resolveUser(authHeader) == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        if (!roomRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Message> messages = messageRepository.findByRoomIdOrderByTimestampAsc(id);
+        return ResponseEntity.ok(messages);
     }
 
     public static class CreateRoomRequest {
