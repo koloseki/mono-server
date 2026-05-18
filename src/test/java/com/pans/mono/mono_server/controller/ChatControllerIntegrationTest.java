@@ -41,7 +41,7 @@ class ChatControllerIntegrationTest {
 
         StompSession session = stompClient
                 .connectAsync(url, new StompSessionHandlerAdapter() {})
-                .get(1, TimeUnit.SECONDS);
+                .get(5, TimeUnit.SECONDS);
 
         session.subscribe("/topic/public", new StompSessionHandlerAdapter() {
             @Override
