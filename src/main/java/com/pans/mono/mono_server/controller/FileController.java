@@ -32,6 +32,10 @@ public class FileController {
             return ResponseEntity.badRequest().body("File is empty");
         }
 
+        if (file.getSize() > 10 * 1024 * 1024) {
+            return ResponseEntity.badRequest().body("File too large (max 10 MB)");
+        }
+
         try {
             String filename = storageService.store(file);
             return ResponseEntity.ok(Map.of(
