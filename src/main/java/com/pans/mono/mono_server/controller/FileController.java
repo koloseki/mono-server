@@ -77,8 +77,9 @@ public class FileController {
             return ResponseEntity.notFound().build();
         }
 
+        String safeFilename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeFilename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
