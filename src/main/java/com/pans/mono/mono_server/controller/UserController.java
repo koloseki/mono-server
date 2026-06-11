@@ -3,6 +3,10 @@ package com.pans.mono.mono_server.controller;
 import com.pans.mono.mono_server.dto.AuthResponse;
 import com.pans.mono.mono_server.model.User;
 import com.pans.mono.mono_server.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth", description = "Registration and login")
 public class UserController {
     private final UserRepository userRepository;
 
@@ -25,6 +30,11 @@ public class UserController {
         public String password;
     }
 
+    @Operation(summary = "Register a new user")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Registration successful"),
+        @ApiResponse(responseCode = "400", description = "Username already taken or password too short")
+    })
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody AuthRequest request) {
         if (request.password == null || request.password.length() < 8) {
@@ -45,6 +55,11 @@ public class UserController {
         return ResponseEntity.ok("Registration successful");
     }
 
+    @Operation(summary = "Login and receive a session token")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Returns sessionToken"),
+        @ApiResponse(responseCode = "400", description = "Invalid username or password")
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         var userOptional = userRepository.findByUsername(request.username);

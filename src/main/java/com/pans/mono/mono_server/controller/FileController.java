@@ -3,6 +3,10 @@ package com.pans.mono.mono_server.controller;
 import com.pans.mono.mono_server.model.User;
 import com.pans.mono.mono_server.repository.UserRepository;
 import com.pans.mono.mono_server.service.StorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,11 +20,18 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/files")
 @RequiredArgsConstructor
+@Tag(name = "Files", description = "File upload and download")
 public class FileController {
 
     private final StorageService storageService;
     private final UserRepository userRepository;
 
+    @Operation(summary = "Upload a file (max 10 MB)")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Returns filename, originalName and fileUrl"),
+        @ApiResponse(responseCode = "400", description = "File empty or too large"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping("/upload")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
                                     @RequestHeader("Authorization") String authHeader) {
@@ -48,6 +59,12 @@ public class FileController {
         }
     }
 
+    @Operation(summary = "Download a file by filename")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "File content as octet-stream"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "File not found")
+    })
     @GetMapping("/{filename}")
     public ResponseEntity<?> download(@PathVariable String filename,
                                       @RequestHeader("Authorization") String authHeader) {
