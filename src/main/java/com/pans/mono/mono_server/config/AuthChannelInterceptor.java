@@ -13,12 +13,32 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import java.security.Principal;
 import java.util.Optional;
 
+/**
+ * Authenticates WebSocket connections at the STOMP protocol level.
+ *
+ * <p>REST endpoints use the {@code Authorization: Bearer} header, but WebSocket clients
+ * send headers only once — during the initial STOMP CONNECT frame. This interceptor
+ * runs before every inbound message and, on CONNECT, reads the {@code X-Auth-Token}
+ * header, validates the session token against the database, and injects a
+ * {@link Principal} into the STOMP session so downstream handlers know who the user is.
+ *
+ * <p>If the token is missing or invalid the connection is rejected immediately.
+ */
 @Component
 @RequiredArgsConstructor
-public class AuthChannelInterceptor implements ChannelInterceptor{
+public class AuthChannelInterceptor implements ChannelInterceptor {
 
     private final UserRepository userRepository;
 
+    /**
+     * Intercepts inbound STOMP frames. Only CONNECT frames are inspected —
+     * all other frame types pass through unchanged.
+     *
+     * @param message the inbound STOMP message
+     * @param channel the channel the message is being sent to
+     * @return the original message (with Principal attached on CONNECT)
+     * @throws IllegalArgumentException if the token is missing or does not match any user
+     */
     @Override
     public Message<?> preSend(Message<?> message, org.springframework.messaging.MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -42,5 +62,4 @@ public class AuthChannelInterceptor implements ChannelInterceptor{
         }
         return message;
     }
-
 }

@@ -4,6 +4,7 @@ import com.pans.mono.mono_server.model.User;
 import com.pans.mono.mono_server.repository.UserRepository;
 import com.pans.mono.mono_server.service.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestPart;
 
 import java.util.Map;
 
@@ -32,9 +34,9 @@ public class FileController {
         @ApiResponse(responseCode = "400", description = "File empty or too large"),
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PostMapping("/upload")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
-                                    @RequestHeader("Authorization") String authHeader) {
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> upload(@RequestPart("file") MultipartFile file,
+                                    @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (resolveUser(authHeader) == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -67,7 +69,7 @@ public class FileController {
     })
     @GetMapping("/{filename}")
     public ResponseEntity<?> download(@PathVariable String filename,
-                                      @RequestHeader("Authorization") String authHeader) {
+                                      @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (resolveUser(authHeader) == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }

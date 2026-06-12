@@ -9,6 +9,7 @@ import com.pans.mono.mono_server.repository.RoomRepository;
 import com.pans.mono.mono_server.repository.UserRepository;
 import com.pans.mono.mono_server.service.RoomTracker;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,7 +38,7 @@ public class RoomController {
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping
-    public ResponseEntity<?> getRooms(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getRooms(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (resolveUser(authHeader) == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -57,7 +58,7 @@ public class RoomController {
     })
     @PostMapping("/{id}/join")
     public ResponseEntity<?> joinRoom(@PathVariable String id,
-                                      @RequestHeader("Authorization") String authHeader) {
+                                      @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authHeader) {
         User user = resolveUser(authHeader);
         if (user == null) {
             return ResponseEntity.status(401).body("Unauthorized");
@@ -82,7 +83,7 @@ public class RoomController {
     })
     @PostMapping
     public ResponseEntity<?> createRoom(@RequestBody CreateRoomRequest request,
-                                        @RequestHeader("Authorization") String authHeader) {
+                                        @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (resolveUser(authHeader) == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
@@ -111,7 +112,7 @@ public class RoomController {
     })
     @GetMapping("/{id}/messages")
     public ResponseEntity<?> getMessages(@PathVariable String id,
-                                         @RequestHeader("Authorization") String authHeader) {
+                                         @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (resolveUser(authHeader) == null) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
